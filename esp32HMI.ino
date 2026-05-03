@@ -8,26 +8,72 @@ uint8_t arr[256];
 uint8_t count = 0;
 unsigned long last_recp = 0;
 
+uint16_t CRC_Calc(uint8_t arr[],uint8_t leng)
+{
+    //CRC calculation
+  uint16_t calculated = 0xFFFF;
+  for(int i = 0;i<leng-2;i++)
+  {
+    calculated = arr[i] ^ calculated ;
+    for(int j = 0 ;j<8;j++)
+    {
+      if(calculated & 0x0001)
+      {
+        calculated = calculated >> 1;
+        calculated = calculated ^ 0xA001;
+      }
+      else
+      {
+        calculated = calculated >> 1;
+      }
+    }
+  }
+  return calculated;
+}
+
 bool CRCcheck(uint8_t arr[],uint8_t leng)
 {
-  // here itself comes the crc calculation and store in calcuated variable
-  if(arr[leng-1] == (calculated & 0XFF) && (arr[leng-2] == (calculated>>8)& 0xFF))
+// CRC checking
+  uint16_t crc = CRC_Calc(arr,leng);
+  if(arr[leng-1] == ( crc & 0XFF) && (arr[leng-2] == (crc >>8)& 0xFF))
   {
     return true;
   }
   else
   return false;
+}
 
+void response(uint8_t arr1[],uint8_t leng)
+{
+  int sensor_reading = 0x1234;
+  uint8_t frame[256];
+  frame[0] = SLAVE_ID;
+  frame[1] = 0x03;
+  frame[2] = 0x02;
+  frame[3] = (sensor_reading >>8)& 0xFF;
+  frame[4] = sensor_reading & 0xFF;
+  uint16_t crc = CRC_Calc(frame,7);
+  frame[5] = (crc) & 0xFF;
+  frame[6] = (crc>>8) & 0xFF;
+  digitalWrite(DE_RE_PIN,HIGH);
+  Serial2.write(frame,7);
+  Serial2.flush();
+  digitalWrite(DE_RE_PIN,LOW);
 }
 
 void processFrame(uint8_t arr1[],uint8_t leng)
 {
   if(arr1[0]==SLAVE_ID && CRCcheck(arr1,leng))
   {
-   
-
+   if(arr1[1] == 0x03)
+   {
+    uint8_t register_add_high = arr1[2];
+    uint8_t register_add_low = arr1[3];
+    uint8_t register_count_high = arr1[4];
+    uint8_t register_count_low = arr1[5];
+    response(arr1,leng);
+   }
   }
-
 }
 
 void setup() 

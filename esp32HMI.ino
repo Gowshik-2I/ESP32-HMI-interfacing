@@ -35,7 +35,7 @@ bool CRCcheck(uint8_t arr[],uint8_t leng)
 {
 // CRC checking
   uint16_t crc = CRC_Calc(arr,leng);
-  if(arr[leng-1] == ( crc & 0XFF) && (arr[leng-2] == (crc >>8)& 0xFF))
+  if(arr[leng-2] == ( crc & 0XFF) && (arr[leng-1] == (crc >>8) & 0xFF))
   {
     return true;
   }
@@ -59,6 +59,15 @@ void response(uint8_t arr1[],uint8_t leng)
   Serial2.write(frame,7);
   Serial2.flush();
   digitalWrite(DE_RE_PIN,LOW);
+  //TX debug
+    Serial.print("TX : ");
+    for(int i = 0 ;i<7;i++)
+    {
+    Serial.print(frame[i]);
+    Serial.print(' ');
+    }
+   Serial.println();
+    //TX debug
 }
 
 void processFrame(uint8_t arr1[],uint8_t leng)
@@ -67,11 +76,21 @@ void processFrame(uint8_t arr1[],uint8_t leng)
   {
    if(arr1[1] == 0x03)
    {
+    Serial.println("inside process frame");
     uint8_t register_add_high = arr1[2];
     uint8_t register_add_low = arr1[3];
     uint8_t register_count_high = arr1[4];
     uint8_t register_count_low = arr1[5];
-    response(arr1,leng);
+    //RX debug
+    Serial.print("RX : ");
+    for(int i = 0 ;i<leng;i++)
+    {
+    Serial.print(arr[i]);
+    Serial.print(' ');
+    }
+   Serial.println();
+    //RX debug
+   response(arr1,leng);
    }
   }
 }
@@ -81,6 +100,8 @@ void setup()
   pinMode(DE_RE_PIN,OUTPUT);
   digitalWrite(DE_RE_PIN,LOW);
   Serial2.begin(baudrate,SERIAL_8N1,RX,TX);
+  Serial.begin(9600);
+  Serial.println("esp is ready");
 }
 
 void loop() 
@@ -95,15 +116,12 @@ void loop()
       break;
     }
   }
-   if(millis()-last_recp>=4 && count!=0)
+  if(millis()-last_recp >= 6 && count!=0 )
     {
+      Serial.println("inside if");
+      Serial.print("count:");
+      Serial.println(count);
       processFrame(arr,count);
-      for(int i = 0;i<count;i++)
-      {
-        arr[i]=0;
-      }
-      count = 0;
-    
+      count = 0; 
     }
-
 }

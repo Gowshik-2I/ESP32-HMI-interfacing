@@ -45,7 +45,7 @@ bool CRCcheck(uint8_t arr[],uint8_t leng)
 
 void response(uint8_t arr1[],uint8_t leng)
 {
-  int sensor_reading = 0x1234;
+  int sensor_reading = 0x1234; //sending a constant
   uint8_t frame[256];
   frame[0] = SLAVE_ID;
   frame[1] = 0x03;

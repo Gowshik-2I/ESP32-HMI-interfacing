@@ -3,11 +3,11 @@
 #define RX 16
 #define TX 17
 #define SLAVE_ID 0x01
+#define IR 33
 
 uint8_t arr[256];
 uint8_t count = 0;
 unsigned long last_recp = 0;
-
 uint16_t CRC_Calc(uint8_t arr[],uint8_t leng)
 {
     //CRC calculation
@@ -45,7 +45,7 @@ bool CRCcheck(uint8_t arr[],uint8_t leng)
 
 void response(uint8_t arr1[],uint8_t leng)
 {
-  int sensor_reading = 0x1234; //sending a constant
+  int sensor_reading = 4095-analogRead(IR);
   uint8_t frame[256];
   frame[0] = SLAVE_ID;
   frame[1] = 0x03;
@@ -98,6 +98,7 @@ void processFrame(uint8_t arr1[],uint8_t leng)
 void setup() 
 {
   pinMode(DE_RE_PIN,OUTPUT);
+  pinMode(IR,INPUT);
   digitalWrite(DE_RE_PIN,LOW);
   Serial2.begin(baudrate,SERIAL_8N1,RX,TX);
   Serial.begin(9600);

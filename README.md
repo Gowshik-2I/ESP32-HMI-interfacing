@@ -16,6 +16,11 @@ The goal was to understand industrial communication at the lowest practical leve
 
 ## Demo
 
+
+https://github.com/user-attachments/assets/cecfe923-aafe-4176-a98a-9f41a2506b3c
+
+
+
 ```
 LDR Sensor (analog light reading)
         ↓
